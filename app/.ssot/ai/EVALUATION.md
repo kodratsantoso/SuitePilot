@@ -71,3 +71,11 @@ Each output is scored 0–5 on each dimension. Minimum passing threshold per ski
 | Governance | 4.5 |
 
 Outputs below threshold are flagged and not allowed into the review workflow without a Governance Agent exception.
+## Runtime Evaluation Storage
+
+AI evaluation is database-backed by:
+
+- `EvaluationCase`: skill, prompt, expected answer, and risk level.
+- `AiEvaluationRun`: run status, score, findings, runner, optional AI output link.
+
+High-risk or low-scoring outputs must remain in review until a qualified reviewer approves the related deliverable.

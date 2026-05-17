@@ -112,3 +112,13 @@ The embedded prompt approach has known limitations vs. full RAG:
 - Domain knowledge in prompts is static — does not update automatically when NetSuite releases new features
 
 These gaps are accepted for Phase 1 and will be addressed progressively from Phase 9 onwards.
+## Runtime RAG Storage
+
+Project RAG now uses database-backed sources:
+
+- `KnowledgeSource`: source owner, category, status, freshness timestamps.
+- `KnowledgeDocument`: stored source content and tags.
+- `KnowledgeChunk`: retrievable evidence chunks with citation references.
+- `RetrievalLog`: query, score, and optional output usage trail.
+
+Deprecated sources remain auditable but are excluded from default retrieval.

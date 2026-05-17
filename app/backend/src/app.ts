@@ -38,6 +38,7 @@ import { adminRoutes } from './modules/admin/routes.js'
 import { billingRoutes, subscriptionPlanRoutes, tenantRoutes } from './modules/admin/saas-routes.js'
 import { deploymentRoutes } from './modules/deployment/routes.js'
 import { securityRoutes } from './modules/security/routes.js'
+import { documentRoutes, evaluationRoutes, knowledgeRoutes, registryRoutes } from './modules/roadmap-foundation/routes.js'
 import { authMiddleware } from './middleware/auth.middleware.js'
 import { requirePermission, PERMISSIONS } from './middleware/rbac.middleware.js'
 
@@ -83,6 +84,7 @@ export function createApp() {
   app.route('/api/projects/:projectId/ai/generated-outputs', aiGeneratedOutputRoutes)
   app.route('/api/projects/:projectId/ai/generated-outputs/:outputId/reviews', aiReviewRoutes)
   app.route('/api/ai/conversations/:conversationId/messages', aiMessageRoutes)
+  app.route('/api/ai/registry', registryRoutes)
 
   // AI Presales Intelligence routes
   app.route('/api/projects/:projectId/ai', aiPresalesRoutes)
@@ -98,6 +100,9 @@ export function createApp() {
 
   // AI Governance & RAG Layer routes
   app.route('/api/projects/:projectId/governance', governanceRoutes)
+  app.route('/api/projects/:projectId/documents', documentRoutes)
+  app.route('/api/projects/:projectId/knowledge', knowledgeRoutes)
+  app.route('/api/projects/:projectId/evaluations', evaluationRoutes)
 
   // Enterprise Reporting & Dashboard Layer routes
   app.route('/api/dashboard', dashboardRoutes)

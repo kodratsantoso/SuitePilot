@@ -426,3 +426,13 @@ Future skills for payment gateway webhook handling and automated usage metering 
 # Prompt 17 Skill Registry Update
 
 Added global admin operating procedures for cross-tenant analytics, tenant lifecycle management, superuser RBAC, deployment oversight, and audit review. These workflows reference `SAAS_GLOBAL_ADMIN.md`.
+## Runtime Registry
+
+The runtime skill registry is database-backed by `AiSkill`.
+
+Skill markdown files remain under `ai/skills/` as controlled source definitions. Runtime application configuration and visibility are served by:
+
+- `GET /api/ai/registry`
+- `POST /api/ai/registry/skills`
+
+Only superusers can mutate runtime skill records. Generated AI outputs must record the skill name used.

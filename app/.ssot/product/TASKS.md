@@ -214,3 +214,18 @@
 - Status: Implemented
 - Added superuser-only global dashboard, tenant lifecycle controls, user role management, deployment oversight, global alerts, analytics snapshots, and superuser action logs.
 - Validation: backend and frontend typecheck pass; Docker validation is tracked in deployment validation notes.
+
+## Roadmap Foundation Completion — 2026-05-17
+
+- [x] Added DB-backed AI registry models for `AiAgent` and `AiSkill`.
+- [x] Added DB-backed document workflow models for templates, project documents, sections, versions, and review comments.
+- [x] Added DB-backed RAG models for knowledge sources, documents, chunks, and retrieval logs.
+- [x] Added DB-backed evaluation models for evaluation cases and AI evaluation runs.
+- [x] Added backend API groups for `/api/projects/:projectId/documents`, `/api/projects/:projectId/knowledge`, `/api/projects/:projectId/evaluations`, and `/api/ai/registry`.
+- [x] Replaced project Documents placeholder with a usable document list/create view.
+- [x] Replaced AI Workspace Settings placeholder with live agent registry, skill registry, RAG, and evaluation summary panels.
+- [x] Added starter repository artifacts for prompts, evaluations, knowledge, app docs, packages, scripts, and tests.
+
+## Next Recommended Prompt
+
+**Prompt 18 — Optional Continuous SaaS Operations & Monitoring Layer: Long-term Monitoring, SLA Dashboards, and Predictive Capacity Planning**

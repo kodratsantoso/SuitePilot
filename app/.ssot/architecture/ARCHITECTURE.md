@@ -398,3 +398,13 @@ The security layer adds encryption, secret governance, access logs, compliance r
 # Prompt 17 — Global Admin Architecture
 
 The global admin layer extends the SaaS administration module with superuser-only APIs under `/api/admin`. Cross-tenant aggregation is centralized in the admin service and guarded by `requireSuperuser`, preserving tenant-scoped APIs for normal users. The frontend exposes dedicated `/admin/global-dashboard`, `/admin/users`, `/admin/tenants`, and `/admin/deployments` routes.
+## Roadmap Foundation Completion — 2026-05-17
+
+SuitePilot now includes DB-backed foundation services for the roadmap areas that were previously represented mainly by files or placeholders:
+
+- AI registry service: `/api/ai/registry`
+- Document workflow service: `/api/projects/:projectId/documents`
+- RAG knowledge service: `/api/projects/:projectId/knowledge`
+- Evaluation service: `/api/projects/:projectId/evaluations`
+
+All project services enforce organization/project scoping in the service layer and write audit records for material mutations.

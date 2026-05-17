@@ -839,3 +839,24 @@ Enums:
 - `SuperuserActionLog`: immutable record of master actions with actor, action type, tenant/project target, description, and timestamp.
 - `GlobalAnalyticsSnapshot`: typed JSON analytics snapshot for cross-tenant KPI, AI output quality, RAG distribution, and usage summaries.
 - Relations were added from `User`, `Tenant`, and `Project` for auditability and drill-down.
+
+## Roadmap Foundation Completion Models
+
+| Model | Purpose | Isolation |
+|---|---|---|
+| `AiAgent` | DB-backed role agent registry | System-level, superuser mutation |
+| `AiSkill` | DB-backed skill registry linked to agents | System-level, superuser mutation |
+| `AiOutputVersion` | Immutable content snapshots for generated outputs | Through `AiGeneratedOutput.projectId` |
+| `DocumentTemplate` | Reusable document section templates | System-level |
+| `ProjectDocument` | Project deliverable record | `organizationId + projectId` |
+| `DocumentSection` | Ordered document content blocks | Parent document |
+| `DocumentVersion` | Immutable document snapshots | Parent document |
+| `ReviewComment` | Human review comments | Parent document |
+| `KnowledgeSource` | Controlled RAG source metadata | `organizationId + projectId` |
+| `KnowledgeDocument` | Source document content | Parent source |
+| `KnowledgeChunk` | Retrieval unit with citation reference | Parent document |
+| `RetrievalLog` | Evidence/retrieval usage trail | Parent chunk |
+| `EvaluationCase` | Skill test case and expected answer | `organizationId + projectId` |
+| `AiEvaluationRun` | Scored evaluation run history | `organizationId + projectId` |
+
+Document, knowledge, and evaluation writes must create audit logs. Project-scoped reads must never return records outside the actor organization.

@@ -811,3 +811,52 @@ API versioning will be introduced when breaking changes are required. Initial ve
 - `POST /api/admin/deployments/trigger`
 
 All endpoints require superuser access and log mutation actions to `SuperuserActionLog`.
+
+## Roadmap Foundation Completion APIs
+
+### Project Documents
+
+Base: `/api/projects/:projectId/documents`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | List project documents with status and type filters |
+| POST | `/` | Create a versioned project document draft |
+| GET | `/:documentId` | Read document sections, versions, and review comments |
+| PATCH | `/:documentId` | Update document metadata, status, and sections; creates a new version |
+| POST | `/:documentId/comments` | Add human review comment |
+
+### Knowledge and RAG
+
+Base: `/api/projects/:projectId/knowledge`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/sources` | List project knowledge sources |
+| POST | `/sources` | Create project knowledge source |
+| PATCH | `/sources/:sourceId` | Update source metadata/status |
+| POST | `/documents` | Store a knowledge document and generate chunks |
+| POST | `/retrieve` | Retrieve matching chunks and create retrieval logs |
+
+### Evaluation
+
+Base: `/api/projects/:projectId/evaluations`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/cases` | List skill evaluation cases |
+| POST | `/cases` | Create evaluation case |
+| GET | `/runs` | List evaluation run history |
+| POST | `/runs` | Record an evaluation run and score |
+
+### AI Registry
+
+Base: `/api/ai/registry`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | List DB-backed agents and skills |
+| POST | `/agents` | Superuser-only agent registration |
+| POST | `/skills` | Superuser-only skill registration |
+
+Isolation rule: all project endpoints validate `organizationId + projectId` before reading or mutating project-scoped records.

@@ -171,3 +171,13 @@ The Security/Governance and Product Architecture developer agents now have an ex
 # Prompt 17 Registry Update
 
 Global Admin/Superuser workflows are supported by the Governance Agent, PMO Agent, and DevOps Deployment Developer for cross-tenant oversight, deployment control, audit review, and enterprise exception handling.
+## Runtime Registry
+
+The runtime agent registry is database-backed by `AiAgent`.
+
+Initial file definitions remain under `ai/agents/` for governance and review, while application reads and superuser maintenance use:
+
+- `GET /api/ai/registry`
+- `POST /api/ai/registry/agents`
+
+Only superusers can mutate runtime agent records.

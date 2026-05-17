@@ -215,6 +215,28 @@ enum AiOutputStatus {
   PUBLISHED
 }
 
+enum DocumentStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum KnowledgeSourceStatus {
+  ACTIVE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum EvaluationRunStatus {
+  QUEUED
+  RUNNING
+  PASSED
+  FAILED
+  NEEDS_REVIEW
+}
+
 enum AiReviewStatus {
   APPROVED
   REJECTED
@@ -526,6 +548,10 @@ model User {
   triggeredDeployments DeploymentRun[]              @relation("DeploymentTriggeredBy")
   accessLogs           AccessLog[]
   superuserActionLogs  SuperuserActionLog[]         @relation("SuperuserActionActor")
+  projectDocuments     ProjectDocument[]            @relation("DocumentCreator")
+  documentReviews      ReviewComment[]              @relation("ReviewCommentAuthor")
+  knowledgeSources     KnowledgeSource[]            @relation("KnowledgeSourceOwner")
+  evaluationRuns       AiEvaluationRun[]            @relation("EvaluationRunner")
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -662,6 +688,10 @@ model Project {
   accessLogs AccessLog[]
   superuserActionLogs SuperuserActionLog[]
   globalAnalyticsSnapshots GlobalAnalyticsSnapshot[]
+  projectDocuments ProjectDocument[]
+  knowledgeSources KnowledgeSource[]
+  evaluationCases EvaluationCase[]
+  evaluationRuns AiEvaluationRun[]
 
   // AI Discovery relations
   discoverySessions          DiscoverySession[]
@@ -1107,6 +1137,9 @@ model AiGeneratedOutput {
   outputValidations OutputValidation[]
   reviewGates       ReviewGateStatus[]
   feedbackEntries   FeedbackEntry[]
+  versions          AiOutputVersion[]
+  projectDocuments  ProjectDocument[]
+  evaluationRuns    AiEvaluationRun[]
 
   @@index([organizationId])
   @@index([projectId])
@@ -1130,6 +1163,145 @@ model AiReview {
 
   @@index([aiGeneratedOutputId])
   @@index([reviewerId])
+  @@index([status])
+}
+
+model AiAgent {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  role        String
+  description String?
+  definitionPath String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  skills AiSkill[]
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model AiSkill {
+  id          String   @id @default(uuid())
+  agentId     String?
+  name        String   @unique
+  category    String
+  description String?
+  definitionPath String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agent AiAgent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([agentId])
+  @@index([category])
+  @@index([isActive])
+}
+
+model AiOutputVersion {
+  id                  String   @id @default(uuid())
+  aiGeneratedOutputId String
+  version             Int
+  content             String   @db.Text
+  changeSummary       String?
+  createdAt           DateTime @default(now())
+
+  output AiGeneratedOutput @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: Cascade)
+
+  @@unique([aiGeneratedOutputId, version])
+  @@index([aiGeneratedOutputId])
+}
+
+model DocumentTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  documentType AiOutputType
+  description String?
+  sections    Json     @default("[]")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents ProjectDocument[]
+
+  @@unique([name, documentType])
+  @@index([documentType])
+  @@index([isActive])
+}
+
+model ProjectDocument {
+  id                  String         @id @default(uuid())
+  organizationId      String
+  projectId           String
+  templateId          String?
+  aiGeneratedOutputId String?
+  title               String
+  documentType        AiOutputType
+  status              DocumentStatus @default(DRAFT)
+  createdBy           String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  template DocumentTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  aiGeneratedOutput AiGeneratedOutput? @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: SetNull)
+  creator User @relation("DocumentCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  sections DocumentSection[]
+  versions DocumentVersion[]
+  reviewComments ReviewComment[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([templateId])
+  @@index([aiGeneratedOutputId])
+  @@index([documentType])
+  @@index([status])
+}
+
+model DocumentSection {
+  id          String   @id @default(uuid())
+  documentId  String
+  title       String
+  content     String   @db.Text
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document ProjectDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([sortOrder])
+}
+
+model DocumentVersion {
+  id          String   @id @default(uuid())
+  documentId  String
+  version     Int
+  snapshot    Json
+  createdAt   DateTime @default(now())
+
+  document ProjectDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@index([documentId])
+}
+
+model ReviewComment {
+  id          String   @id @default(uuid())
+  documentId  String
+  authorId    String
+  comment     String   @db.Text
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+
+  document ProjectDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  author User @relation("ReviewCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([documentId])
+  @@index([authorId])
   @@index([status])
 }
 
@@ -2462,4 +2634,114 @@ model GlobalAnalyticsSnapshot {
   @@index([tenantId])
   @@index([projectId])
   @@index([snapshotDate])
+}
+
+model KnowledgeSource {
+  id             String                @id @default(uuid())
+  organizationId String
+  projectId      String?
+  name           String
+  category       String
+  ownerId        String
+  status         KnowledgeSourceStatus @default(ACTIVE)
+  lastUpdatedAt  DateTime              @default(now())
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User     @relation("KnowledgeSourceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  documents KnowledgeDocument[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([category])
+  @@index([status])
+}
+
+model KnowledgeDocument {
+  id          String   @id @default(uuid())
+  sourceId    String
+  title       String
+  content     String   @db.Text
+  tags        Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  source KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  chunks KnowledgeChunk[]
+
+  @@index([sourceId])
+}
+
+model KnowledgeChunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  content     String   @db.Text
+  chunkIndex  Int
+  citationRef String?
+  embedding   Json?
+  createdAt   DateTime @default(now())
+
+  document KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  retrievalLogs RetrievalLog[]
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+}
+
+model RetrievalLog {
+  id          String   @id @default(uuid())
+  chunkId     String
+  query       String
+  score       Float?
+  usedInOutputId String?
+  createdAt   DateTime @default(now())
+
+  chunk KnowledgeChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@index([chunkId])
+  @@index([usedInOutputId])
+}
+
+model EvaluationCase {
+  id             String   @id @default(uuid())
+  organizationId String
+  projectId      String?
+  skillName      String
+  prompt         String   @db.Text
+  expectedAnswer String   @db.Text
+  riskLevel      Severity @default(MEDIUM)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  runs    AiEvaluationRun[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([skillName])
+}
+
+model AiEvaluationRun {
+  id                  String              @id @default(uuid())
+  organizationId      String
+  projectId           String?
+  evaluationCaseId    String
+  aiGeneratedOutputId String?
+  runBy               String
+  status              EvaluationRunStatus @default(QUEUED)
+  score               Float?
+  findings            Json                @default("[]")
+  createdAt           DateTime            @default(now())
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evaluationCase EvaluationCase @relation(fields: [evaluationCaseId], references: [id], onDelete: Cascade)
+  output AiGeneratedOutput? @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: SetNull)
+  runner User @relation("EvaluationRunner", fields: [runBy], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([evaluationCaseId])
+  @@index([aiGeneratedOutputId])
+  @@index([status])
 }

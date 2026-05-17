@@ -182,3 +182,11 @@ Validation commands executed on 2026-05-16:
 - Global tenant and user APIs must return cross-tenant data only through `/api/admin`.
 - Tenant status, subscription override, user role change, and deployment trigger mutations must write `SuperuserActionLog`.
 - Deployment triggers must preserve tenant/project target context where supplied.
+## Roadmap Foundation Completion API Validation
+
+- Document APIs must reject access when `projectId` does not belong to the actor organization.
+- Knowledge APIs must restrict sources and documents to the actor project.
+- RAG retrieval must log retrieved chunks in `RetrievalLog`.
+- Evaluation APIs must validate that linked outputs belong to the same project.
+- AI registry mutation endpoints require superuser access.
+- All create/update actions must write `AuditLog` records.

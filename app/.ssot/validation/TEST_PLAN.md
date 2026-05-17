@@ -285,3 +285,17 @@ Pending:
 - Backend: validate superuser RBAC, cross-tenant aggregation, tenant lifecycle status changes, subscription overrides, user role assignment, deployment trigger records, and superuser action logging.
 - Frontend: validate `/admin/global-dashboard`, `/admin/tenants`, `/admin/users`, and `/admin/deployments` render states, mutation controls, and alert/action tables.
 - Docker: validate `SUPERUSER_EMAILS`, Prisma migration deploy, and health checks in the compose stack.
+## Roadmap Foundation Completion Test Plan
+
+Backend:
+
+- Validate Prisma schema generation for new document/RAG/evaluation/registry models.
+- Typecheck backend route/service contracts.
+- Add API tests for tenant/project isolation on documents, knowledge, and evaluations.
+- Add superuser-only tests for AI registry mutation.
+
+Frontend:
+
+- Typecheck document workspace and AI settings workspace.
+- Render documents page with empty state and created document table.
+- Render AI settings with registry, RAG source, and evaluation panels.

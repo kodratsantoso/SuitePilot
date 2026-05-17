@@ -1124,3 +1124,114 @@ export interface ComplianceReport {
   retentionPolicyDays: number
   dataSubjectRights: string[]
 }
+
+// ─── Roadmap Foundation Completion ────────────────────────────────────────
+
+export type DocumentStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'ARCHIVED'
+export type KnowledgeSourceStatus = 'ACTIVE' | 'DEPRECATED' | 'ARCHIVED'
+export type EvaluationRunStatus = 'QUEUED' | 'RUNNING' | 'PASSED' | 'FAILED' | 'NEEDS_REVIEW'
+
+export interface ProjectDocument {
+  id: string
+  organizationId: string
+  projectId: string
+  title: string
+  documentType: AiOutputType
+  status: DocumentStatus
+  createdAt: string
+  updatedAt: string
+  creator?: { id: string; name: string; email?: string }
+  aiGeneratedOutput?: { id: string; title: string; status: AiOutputStatus } | null
+  sections?: Array<{ id: string; title: string; content: string; sortOrder: number }>
+  reviewComments?: Array<{ id: string; comment: string; status: string; createdAt: string; author?: { id: string; name: string } }>
+  versions?: Array<{ id: string; version: number; createdAt: string }>
+  _count?: { sections: number; versions: number; reviewComments: number }
+}
+
+export interface KnowledgeSource {
+  id: string
+  organizationId: string
+  projectId?: string | null
+  name: string
+  category: string
+  status: KnowledgeSourceStatus
+  lastUpdatedAt: string
+  createdAt: string
+  updatedAt: string
+  owner?: { id: string; name: string }
+  _count?: { documents: number }
+}
+
+export interface KnowledgeDocument {
+  id: string
+  sourceId: string
+  title: string
+  content: string
+  tags: string[]
+  chunks?: Array<{ id: string; chunkIndex: number; citationRef?: string | null }>
+  createdAt: string
+  updatedAt: string
+}
+
+export interface KnowledgeRetrievalResult {
+  id: string
+  content: string
+  citationRef?: string | null
+  score: number
+  document: { id: string; title: string }
+  source: { id: string; name: string; category: string }
+}
+
+export interface EvaluationCase {
+  id: string
+  organizationId: string
+  projectId?: string | null
+  skillName: string
+  prompt: string
+  expectedAnswer: string
+  riskLevel: Severity
+  createdAt: string
+  updatedAt: string
+  _count?: { runs: number }
+}
+
+export interface AiEvaluationRun {
+  id: string
+  organizationId: string
+  projectId?: string | null
+  evaluationCaseId: string
+  aiGeneratedOutputId?: string | null
+  status: EvaluationRunStatus
+  score?: number | null
+  findings: Array<Record<string, unknown>>
+  createdAt: string
+  evaluationCase?: EvaluationCase
+  output?: { id: string; title: string } | null
+  runner?: { id: string; name: string }
+}
+
+export interface AiAgent {
+  id: string
+  name: string
+  role: string
+  description?: string | null
+  definitionPath?: string | null
+  isActive: boolean
+  skills?: AiSkill[]
+}
+
+export interface AiSkill {
+  id: string
+  agentId?: string | null
+  name: string
+  category: string
+  description?: string | null
+  definitionPath?: string | null
+  isActive: boolean
+  agent?: { id: string; name: string; role: string } | null
+}
+
+export interface AiRegistry {
+  agents: AiAgent[]
+  skills: AiSkill[]
+}

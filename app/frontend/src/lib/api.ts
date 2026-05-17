@@ -71,6 +71,13 @@ import type {
   ComplianceReport,
   EncryptedField,
   SecretStore,
+  ProjectDocument,
+  KnowledgeSource,
+  KnowledgeDocument,
+  KnowledgeRetrievalResult,
+  EvaluationCase,
+  AiEvaluationRun,
+  AiRegistry,
 } from '../types/index.js'
 
 const BASE = '/api'
@@ -696,4 +703,57 @@ export const securityApi = {
     request<SecretStore>(`/security/secrets/${secretId}/rotate`, { method: 'PATCH', body: JSON.stringify(data) }),
   listEncryptedFields: () => request<EncryptedField[]>('/security/encrypted-fields'),
   getComplianceReport: () => request<ComplianceReport>('/security/compliance-report'),
+}
+
+export const documentsApi = {
+  list: (projectId: string, params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request<ProjectDocument[]>(`/projects/${projectId}/documents${qs}`)
+  },
+  get: (projectId: string, documentId: string) =>
+    request<ProjectDocument>(`/projects/${projectId}/documents/${documentId}`),
+  create: (projectId: string, data: Record<string, unknown>) =>
+    request<ProjectDocument>(`/projects/${projectId}/documents`, { method: 'POST', body: JSON.stringify(data) }),
+  update: (projectId: string, documentId: string, data: Record<string, unknown>) =>
+    request<ProjectDocument>(`/projects/${projectId}/documents/${documentId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  comment: (projectId: string, documentId: string, data: Record<string, unknown>) =>
+    request<ProjectDocument>(`/projects/${projectId}/documents/${documentId}/comments`, { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export const knowledgeApi = {
+  listSources: (projectId: string, params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request<KnowledgeSource[]>(`/projects/${projectId}/knowledge/sources${qs}`)
+  },
+  createSource: (projectId: string, data: Record<string, unknown>) =>
+    request<KnowledgeSource>(`/projects/${projectId}/knowledge/sources`, { method: 'POST', body: JSON.stringify(data) }),
+  updateSource: (projectId: string, sourceId: string, data: Record<string, unknown>) =>
+    request<KnowledgeSource>(`/projects/${projectId}/knowledge/sources/${sourceId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  createDocument: (projectId: string, data: Record<string, unknown>) =>
+    request<KnowledgeDocument>(`/projects/${projectId}/knowledge/documents`, { method: 'POST', body: JSON.stringify(data) }),
+  retrieve: (projectId: string, data: Record<string, unknown>) =>
+    request<KnowledgeRetrievalResult[]>(`/projects/${projectId}/knowledge/retrieve`, { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export const evaluationsApi = {
+  listCases: (projectId: string, params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request<EvaluationCase[]>(`/projects/${projectId}/evaluations/cases${qs}`)
+  },
+  createCase: (projectId: string, data: Record<string, unknown>) =>
+    request<EvaluationCase>(`/projects/${projectId}/evaluations/cases`, { method: 'POST', body: JSON.stringify(data) }),
+  listRuns: (projectId: string, params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request<AiEvaluationRun[]>(`/projects/${projectId}/evaluations/runs${qs}`)
+  },
+  run: (projectId: string, data: Record<string, unknown>) =>
+    request<AiEvaluationRun>(`/projects/${projectId}/evaluations/runs`, { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export const aiRegistryApi = {
+  get: () => request<AiRegistry>('/ai/registry'),
+  createAgent: (data: Record<string, unknown>) =>
+    request('/ai/registry/agents', { method: 'POST', body: JSON.stringify(data) }),
+  createSkill: (data: Record<string, unknown>) =>
+    request('/ai/registry/skills', { method: 'POST', body: JSON.stringify(data) }),
 }
