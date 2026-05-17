@@ -1,0 +1,111 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: suitepilot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  backend:
+    build:
+      context: .
+      dockerfile: app/backend/Dockerfile
+    restart: unless-stopped
+    command: >
+      sh -c "mkdir -p /workspace/app/node_modules/@prisma
+      && ln -sfn ../../backend/node_modules/@prisma/client /workspace/app/node_modules/@prisma/client
+      && pnpm db:migrate:prod
+      && pnpm db:generate
+      && pnpm dev"
+    ports:
+      - '5001:3001'
+    environment:
+      NODE_ENV: development
+      PORT: '3001'
+      PRISMA_GENERATE_SKIP_AUTOINSTALL: 'true'
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/suitepilot
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-change-in-production-minimum-32-chars
+      SESSION_SECRET: dev-session-secret-change-in-production-min-32
+      SECURITY_ENCRYPTION_KEY: dev-security-encryption-key-change-prod-32
+      SUPERUSER_EMAILS: ${SUPERUSER_EMAILS:-admin@example.com}
+      FRONTEND_URL: http://localhost:5100
+      ANTHROPIC_API_KEY: ''
+      OPENAI_API_KEY: ''
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/api/health/ready >/dev/null 2>&1 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - ./app/package.json:/workspace/app/package.json:ro
+      - ./app/backend/src:/workspace/app/backend/src:ro
+      - ./app/prisma:/workspace/app/prisma:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+  frontend:
+    build:
+      context: .
+      dockerfile: app/frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '5100:3000'
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:5001
+      API_URL: http://backend:3001
+    depends_on:
+      - backend
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+volumes:
+  postgres_data:

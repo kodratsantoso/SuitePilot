@@ -1,0 +1,56 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-ops@example.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/suitepilot/backend}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.suitepilot-api.rule=Host(`${API_HOST:-api.suitepilot.example}`)
+      - traefik.http.routers.suitepilot-api.entrypoints=websecure
+      - traefik.http.routers.suitepilot-api.tls.certresolver=letsencrypt
+      - traefik.http.services.suitepilot-api.loadbalancer.server.port=3001
+    deploy:
+      replicas: ${BACKEND_REPLICAS:-2}
+      restart_policy:
+        condition: on-failure
+      update_config:
+        order: start-first
+        failure_action: rollback
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/suitepilot/frontend}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.suitepilot-web.rule=Host(`${WEB_HOST:-suitepilot.example}`)
+      - traefik.http.routers.suitepilot-web.entrypoints=websecure
+      - traefik.http.routers.suitepilot-web.tls.certresolver=letsencrypt
+      - traefik.http.services.suitepilot-web.loadbalancer.server.port=3000
+    deploy:
+      replicas: ${FRONTEND_REPLICAS:-2}
+      restart_policy:
+        condition: on-failure
+      update_config:
+        order: start-first
+        failure_action: rollback
+
+volumes:
+  traefik_letsencrypt:

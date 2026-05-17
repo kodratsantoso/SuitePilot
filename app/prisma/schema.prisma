@@ -1,0 +1,2465 @@
+// SuitePilot — Prisma Schema
+// Last updated: 2026-05-16 (Prompt 13 — SaaS Multi-Tenant Management Layer)
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum CustomerStatus {
+  LEAD
+  QUALIFIED
+  PROSPECT
+  CUSTOMER
+  INACTIVE
+}
+
+enum ProjectType {
+  NEW_IMPLEMENTATION
+  OPTIMIZATION
+  INTEGRATION
+  SUPPORT
+  UPGRADE
+  ASSESSMENT
+}
+
+enum ProjectStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  ON_HOLD
+  AT_RISK
+  DELAYED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectHealth {
+  GREEN
+  AMBER
+  RED
+  UNKNOWN
+}
+
+enum ProjectPhase {
+  PRESALES
+  DISCOVERY
+  DESIGN
+  BUILD
+  UAT
+  CUTOVER
+  HYPERCARE
+  CLOSED
+}
+
+enum ProjectMemberRole {
+  PROJECT_MANAGER
+  FUNCTIONAL_CONSULTANT
+  TECHNICAL_CONSULTANT
+  SOLUTION_ARCHITECT
+  QA
+  DEVELOPER
+  STAKEHOLDER
+}
+
+enum TaskStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  IN_REVIEW
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MilestoneStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+  AT_RISK
+  CANCELLED
+}
+
+enum RaidType {
+  RISK
+  ASSUMPTION
+  ISSUE
+  DEPENDENCY
+  DECISION
+}
+
+enum RaidStatus {
+  OPEN
+  MONITORING
+  MITIGATED
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DiscoverySessionStatus {
+  DRAFT
+  ACTIVE
+  IN_REVIEW
+  COMPLETED
+  ARCHIVED
+}
+
+enum QuestionCategory {
+  COMPANY_PROFILE
+  FINANCE
+  PROCUREMENT
+  INVENTORY
+  SALES
+  CRM
+  MANUFACTURING
+  REPORTING
+  INTEGRATION
+  COMPLIANCE
+  PAIN_POINT
+  GOVERNANCE
+  TECHNICAL
+  OTHER
+}
+
+enum RequirementPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RequirementSource {
+  MANUAL
+  AI_EXTRACTED
+  MEETING
+  DOCUMENT
+  INTERVIEW
+}
+
+enum AssumptionStatus {
+  OPEN
+  VALIDATED
+  INVALID
+  PENDING_REVIEW
+}
+
+enum AiConversationStatus {
+  ACTIVE
+  ARCHIVED
+  LOCKED
+}
+
+enum AiMessageRole {
+  SYSTEM
+  USER
+  ASSISTANT
+}
+
+enum AiOutputType {
+  DISCOVERY_SUMMARY
+  REQUIREMENT_ANALYSIS
+  PAIN_POINT_ANALYSIS
+  MODULE_RECOMMENDATION
+  SCOPE_DRAFT
+  PROPOSAL_DRAFT
+  BRD_DRAFT
+  FIT_GAP_DRAFT
+  RISK_SUMMARY
+  MEETING_SUMMARY
+}
+
+enum AiOutputStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  REVISED
+  PUBLISHED
+}
+
+enum AiReviewStatus {
+  APPROVED
+  REJECTED
+  REVISION_REQUESTED
+}
+
+enum GovernanceEventType {
+  HALLUCINATION_DETECTED
+  VALIDATION_PASSED
+  VALIDATION_FAILED
+  REVIEW_SUBMITTED
+  QUALITY_SCORE_ASSIGNED
+}
+
+enum ValidationType {
+  SCHEMA_CHECK
+  DATA_CONSISTENCY
+  BUSINESS_RULE_CHECK
+}
+
+enum ValidationResult {
+  PASS
+  WARNING
+  FAIL
+}
+
+enum ReviewGateStage {
+  AI_SELF_VALIDATION
+  PEER_REVIEW
+  HUMAN_REVIEW
+  GOVERNANCE_APPROVAL
+}
+
+enum ReviewGateStatusEnum {
+  PENDING
+  PASSED
+  REJECTED
+  REVISION_REQUESTED
+}
+
+enum RagStatus {
+  GREEN
+  AMBER
+  RED
+}
+
+enum HypercareTaskStatus {
+  BACKLOG
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  ESCALATED
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum GoLiveStatus {
+  PENDING
+  COMPLETED
+  BLOCKED
+  NOT_APPLICABLE
+}
+
+enum ChangeRequestStatus {
+  PROPOSED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  IMPLEMENTED
+}
+
+enum PostImplRiskStatus {
+  OPEN
+  MONITORING
+  MITIGATED
+  CLOSED
+}
+
+enum IntegrationMethod {
+  REST
+  SOAP
+  FILE_BASED
+}
+
+enum RestletMethod {
+  GET
+  POST
+  PUT
+  DELETE
+}
+
+enum PayloadType {
+  REQUEST
+  RESPONSE
+}
+
+enum TechnicalDeliverableType {
+  INTEGRATION_MAPPING
+  RESTLET_DESIGN
+  API_CONTRACT
+  PAYLOAD_VALIDATION
+  DATA_MIGRATION_PLAN
+  SECURITY_PLAN
+}
+
+enum TechnicalStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+enum WorkstreamStatus {
+  PLANNED
+  ACTIVE
+  BLOCKED
+  COMPLETED
+  ON_HOLD
+}
+
+enum ProcessCategory {
+  PROCURE_TO_PAY
+  ORDER_TO_CASH
+  RECORD_TO_REPORT
+  INVENTORY_MANAGEMENT
+  FIXED_ASSET
+  CRM
+  MANUFACTURING
+  APPROVAL_WORKFLOW
+  REPORTING
+  PROJECT_ACCOUNTING
+}
+
+enum FitCategory {
+  FIT_STANDARD
+  FIT_WITH_CONFIGURATION
+  FIT_WITH_WORKFLOW
+  FIT_WITH_CUSTOMIZATION
+  FIT_WITH_INTEGRATION
+  GAP
+  OUT_OF_SCOPE
+}
+
+enum UatScenarioStatus {
+  DRAFT
+  READY
+  IN_TESTING
+  PASSED
+  FAILED
+  RETEST_REQUIRED
+}
+
+enum UatCategory {
+  POSITIVE_TEST
+  NEGATIVE_TEST
+  APPROVAL_TEST
+  INTEGRATION_TEST
+  REGRESSION_TEST
+  SECURITY_TEST
+}
+
+enum SopStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DeliverableType {
+  PROCESS_MAPPING
+  FIT_GAP_ANALYSIS
+  UAT
+  SOP
+  CONFIGURATION_WORKBOOK
+  TRAINING_MATERIAL
+  MIGRATION_TEMPLATE
+}
+
+enum FunctionalDeliverableStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  REVISION_REQUESTED
+  PUBLISHED
+}
+
+enum EstimatedComplexity {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum ProposalSectionType {
+  EXECUTIVE_SUMMARY
+  CHALLENGES
+  PROPOSED_SOLUTION
+  SCOPE
+  TIMELINE
+  ASSUMPTIONS
+  RISKS
+  DELIVERABLES
+  NEXT_STEPS
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  VIEW
+  EXPORT
+  APPROVE
+  REJECT
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Organization
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Organization {
+  id        String             @id @default(uuid())
+  name      String
+  slug      String             @unique
+  status    OrganizationStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  users     User[]
+  customers Customer[]
+  projects  Project[]
+  auditLogs AuditLog[]
+  roles     Role[]
+  tenant    Tenant?
+  deploymentRuns DeploymentRun[]
+  secretStores SecretStore[]
+  accessLogs   AccessLog[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id             String     @id @default(uuid())
+  organizationId String
+  name           String
+  email          String
+  passwordHash   String?
+  avatarUrl      String?
+  status         UserStatus @default(ACTIVE)
+  lastLoginAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  // Project role relations (named to avoid ambiguity)
+  managedProjects    Project[] @relation("ProjectManager")
+  functionalProjects Project[] @relation("FunctionalLead")
+  technicalProjects  Project[] @relation("TechnicalLead")
+  createdProjects    Project[] @relation("ProjectCreator")
+  updatedProjects    Project[] @relation("ProjectUpdater")
+
+  projectMemberships ProjectMember[]
+  ownedTasks         ProjectTask[]      @relation("TaskOwner")
+  createdTasks       ProjectTask[]      @relation("TaskCreator")
+  updatedTasks       ProjectTask[]      @relation("TaskUpdater")
+  ownedMilestones    ProjectMilestone[] @relation("MilestoneOwner")
+  createdMilestones  ProjectMilestone[] @relation("MilestoneCreator")
+  ownedRaidItems     RaidItem[]         @relation("RaidOwner")
+  createdRaidItems   RaidItem[]         @relation("RaidCreator")
+  updatedRaidItems   RaidItem[]         @relation("RaidUpdater")
+  auditLogs          AuditLog[]
+  createdCustomers   Customer[]         @relation("CustomerCreator")
+  updatedCustomers   Customer[]         @relation("CustomerUpdater")
+  userRoles          UserRole[]
+
+  // Functional delivery relations
+  ownedWorkstreams          FunctionalWorkstream[] @relation("WorkstreamOwner")
+  ownedTechnicalWorkstreams TechnicalWorkstream[]  @relation("TechnicalWorkstreamOwner")
+  ownedHypercareTasks         HypercareTask[]   @relation("HypercareTaskOwner")
+  assignedIssues              Issue[]           @relation("IssueAssignee")
+  requestedChanges            ChangeRequest[]   @relation("ChangeRequester")
+  governanceReviews           GovernanceEvent[] @relation("GovernanceReviewer")
+  reviewGateReviews           ReviewGateStatus[] @relation("ReviewGateReviewer")
+
+  // AI Discovery relations
+  createdSessions      DiscoverySession[]  @relation("SessionCreator")
+  updatedSessions      DiscoverySession[]  @relation("SessionUpdater")
+  discoveryAnswers     DiscoveryAnswer[]   @relation("AnswerAuthor")
+  createdRequirements  Requirement[]       @relation("RequirementCreator")
+  createdConversations AiConversation[]    @relation("ConversationCreator")
+  createdOutputs       AiGeneratedOutput[]          @relation("OutputCreator")
+  outputReviews        AiReview[]                   @relation("OutputReviewer")
+  feedbackEntries      FeedbackEntry[]              @relation("FeedbackCreatedBy")
+  recommendations      OptimizationRecommendation[] @relation("RecommendationCreatedBy")
+  tenantUserRoles      TenantUserRole[]
+  triggeredDeployments DeploymentRun[]              @relation("DeploymentTriggeredBy")
+  accessLogs           AccessLog[]
+  superuserActionLogs  SuperuserActionLog[]         @relation("SuperuserActionActor")
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Role & Permission (RBAC)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Role {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  isSystem       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Customer
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Customer {
+  id             String         @id @default(uuid())
+  organizationId String
+  name           String
+  industry       String?
+  companySize    String?
+  country        String?
+  website        String?
+  status         CustomerStatus @default(LEAD)
+  notes          String?
+  createdBy      String
+  updatedBy      String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  creator      User         @relation("CustomerCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater      User?        @relation("CustomerUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  projects     Project[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Project
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Project {
+  id                 String        @id @default(uuid())
+  organizationId     String
+  customerId         String
+  projectCode        String
+  name               String
+  description        String?
+  projectType        ProjectType   @default(NEW_IMPLEMENTATION)
+  status             ProjectStatus @default(DRAFT)
+  health             ProjectHealth @default(UNKNOWN)
+  currentPhase       ProjectPhase  @default(PRESALES)
+  startDate          DateTime?
+  targetGoLiveDate   DateTime?
+  actualGoLiveDate   DateTime?
+  progressPercentage Int           @default(0)
+  projectManagerId   String?
+  functionalLeadId   String?
+  technicalLeadId    String?
+  createdBy          String
+  updatedBy          String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  customer       Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  projectManager User?        @relation("ProjectManager", fields: [projectManagerId], references: [id], onDelete: SetNull)
+  functionalLead User?        @relation("FunctionalLead", fields: [functionalLeadId], references: [id], onDelete: SetNull)
+  technicalLead  User?        @relation("TechnicalLead", fields: [technicalLeadId], references: [id], onDelete: SetNull)
+  creator        User         @relation("ProjectCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater        User?        @relation("ProjectUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  members    ProjectMember[]
+  tasks      ProjectTask[]
+  milestones ProjectMilestone[]
+  raidItems  RaidItem[]
+  auditLogs  AuditLog[]
+  accessLogs AccessLog[]
+  superuserActionLogs SuperuserActionLog[]
+  globalAnalyticsSnapshots GlobalAnalyticsSnapshot[]
+
+  // AI Discovery relations
+  discoverySessions          DiscoverySession[]
+  requirements               Requirement[]
+  painPoints                 PainPoint[]
+  assumptions                Assumption[]
+  discoveryRisks             DiscoveryRisk[]
+  recommendedModules         RecommendedModule[]
+  conversations              AiConversation[]
+  generatedOutputs           AiGeneratedOutput[]
+  // AI Presales relations
+  requirementAnalyses          RequirementAnalysis[]
+  painPointClassifications     PainPointClassification[]
+  moduleRecommendationAnalyses ModuleRecommendationAnalysis[]
+  scopeEstimations             ScopeEstimation[]
+  proposalDraftSections        ProposalDraftSection[]
+  // Functional Delivery relations
+  workstreams            FunctionalWorkstream[]
+  businessProcesses      BusinessProcess[]
+  fitGapAnalyses         FitGapAnalysis[]
+  uatScenarios           UatScenario[]
+  sopDocuments           SopDocument[]
+  functionalDeliverables FunctionalDeliverable[]
+  // Technical Delivery relations
+  technicalWorkstreams  TechnicalWorkstream[]
+  integrationMappings   IntegrationMapping[]
+  restletDesigns        RestletDesign[]
+  apiContracts          ApiContract[]
+  payloadValidations    PayloadValidation[]
+  technicalDeliverables TechnicalDeliverable[]
+  // Hypercare & Post-Implementation relations
+  hypercareTasks           HypercareTask[]
+  issues                   Issue[]
+  goLiveReadinessItems     GoLiveReadiness[]
+  changeRequests           ChangeRequest[]
+  postImplementationRisks  PostImplementationRisk[]
+  // Governance relations
+  governanceEvents  GovernanceEvent[]
+  outputValidations OutputValidation[]
+  reviewGates       ReviewGateStatus[]
+  // Continuous improvement relations
+  feedbackEntries              FeedbackEntry[]
+  optimizationRecommendations  OptimizationRecommendation[]
+  optimizationScores           OptimizationScore[]
+
+  @@unique([organizationId, projectCode])
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([status])
+  @@index([health])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ProjectMember
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProjectMember {
+  id        String            @id @default(uuid())
+  projectId String
+  userId    String
+  role      ProjectMemberRole @default(STAKEHOLDER)
+  createdAt DateTime          @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ProjectTask
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProjectTask {
+  id            String       @id @default(uuid())
+  projectId     String
+  title         String
+  description   String?
+  status        TaskStatus   @default(BACKLOG)
+  priority      TaskPriority @default(MEDIUM)
+  ownerId       String?
+  startDate     DateTime?
+  dueDate       DateTime?
+  completedDate DateTime?
+  createdBy     String
+  updatedBy     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("TaskOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  creator User    @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater User?   @relation("TaskUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([ownerId])
+  @@index([dueDate])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ProjectMilestone
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProjectMilestone {
+  id                   String          @id @default(uuid())
+  projectId            String
+  name                 String
+  description          String?
+  status               MilestoneStatus @default(NOT_STARTED)
+  targetDate           DateTime
+  actualDate           DateTime?
+  completionPercentage Int             @default(0)
+  ownerId              String?
+  createdBy            String
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("MilestoneOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  creator User    @relation("MilestoneCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([targetDate])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RaidItem
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RaidItem {
+  id          String     @id @default(uuid())
+  projectId   String
+  type        RaidType
+  title       String
+  description String
+  status      RaidStatus @default(OPEN)
+  severity    Severity?
+  probability Severity?
+  impact      Severity?
+  mitigation  String?
+  ownerId     String?
+  dueDate     DateTime?
+  createdBy   String
+  updatedBy   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("RaidOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  creator User    @relation("RaidCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater User?   @relation("RaidUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([type])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AuditLog — immutable, append-only
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String      @id @default(uuid())
+  organizationId String
+  projectId      String?
+  actorUserId    String?
+  entityType     String
+  entityId       String?
+  action         AuditAction
+  beforeData     Json?
+  afterData      Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Discovery Workspace
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DiscoverySession {
+  id             String                 @id @default(uuid())
+  organizationId String
+  projectId      String
+  title          String
+  description    String?
+  status         DiscoverySessionStatus @default(DRAFT)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdBy      String
+  updatedBy      String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator  User    @relation("SessionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater  User?   @relation("SessionUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  questions          DiscoveryQuestion[]
+  answers            DiscoveryAnswer[]
+  requirements       Requirement[]
+  painPoints         PainPoint[]
+  assumptions        Assumption[]
+  discoveryRisks     DiscoveryRisk[]
+  recommendedModules RecommendedModule[]
+  conversations      AiConversation[]
+  generatedOutputs   AiGeneratedOutput[]
+  // Presales relations
+  requirementAnalyses          RequirementAnalysis[]
+  moduleRecommendationAnalyses ModuleRecommendationAnalysis[]
+  scopeEstimations             ScopeEstimation[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model DiscoveryQuestion {
+  id                 String           @id @default(uuid())
+  discoverySessionId String
+  category           QuestionCategory
+  question           String
+  order              Int              @default(0)
+  createdAt          DateTime         @default(now())
+
+  session DiscoverySession  @relation(fields: [discoverySessionId], references: [id], onDelete: Cascade)
+  answers DiscoveryAnswer[]
+
+  @@index([discoverySessionId])
+  @@index([category])
+}
+
+model DiscoveryAnswer {
+  id                  String   @id @default(uuid())
+  discoveryQuestionId String
+  discoverySessionId  String
+  answer              String
+  answeredBy          String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  question DiscoveryQuestion @relation(fields: [discoveryQuestionId], references: [id], onDelete: Cascade)
+  session  DiscoverySession  @relation(fields: [discoverySessionId], references: [id], onDelete: Cascade)
+  answerer User              @relation("AnswerAuthor", fields: [answeredBy], references: [id], onDelete: Restrict)
+
+  @@index([discoverySessionId])
+  @@index([discoveryQuestionId])
+}
+
+model Requirement {
+  id                 String              @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  title              String
+  description        String?
+  category           QuestionCategory?
+  priority           RequirementPriority @default(MEDIUM)
+  source             RequirementSource   @default(MANUAL)
+  createdBy          String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session      DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+  creator      User              @relation("RequirementCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  analyses     RequirementAnalysis[]
+  fitGapItems  FitGapAnalysis[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([priority])
+}
+
+model PainPoint {
+  id                 String    @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  title              String
+  description        String?
+  severity           Severity  @default(MEDIUM)
+  impactedArea       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session         DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+  classifications PainPointClassification[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([severity])
+}
+
+model Assumption {
+  id                 String           @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  description        String
+  status             AssumptionStatus @default(OPEN)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([status])
+}
+
+model DiscoveryRisk {
+  id                 String     @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  title              String
+  description        String?
+  severity           Severity   @default(MEDIUM)
+  mitigation         String?
+  status             RaidStatus @default(OPEN)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([severity])
+}
+
+model RecommendedModule {
+  id                   String    @id @default(uuid())
+  organizationId       String
+  projectId            String
+  discoverySessionId   String?
+  moduleName           String
+  rationale            String?
+  implementationImpact String?
+  confidenceScore      Float?
+  createdAt            DateTime  @default(now())
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Conversation & Output Pipeline
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AiConversation {
+  id                 String               @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  title              String
+  agentName          String?
+  skillName          String?
+  status             AiConversationStatus @default(ACTIVE)
+  createdBy          String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session  DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+  creator  User              @relation("ConversationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  messages AiMessage[]
+  generatedOutputs AiGeneratedOutput[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([status])
+}
+
+model AiMessage {
+  id             String        @id @default(uuid())
+  conversationId String
+  role           AiMessageRole
+  content        String
+  tokenUsage     Int?
+  model          String?
+  createdAt      DateTime      @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+model AiGeneratedOutput {
+  id                 String         @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  conversationId     String?
+  outputType         AiOutputType
+  title              String
+  content            String
+  version            Int            @default(1)
+  status             AiOutputStatus @default(DRAFT)
+  generatedByAgent   String?
+  generatedBySkill   String?
+  confidenceScore    Float?
+  createdBy          String
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session      DiscoverySession?  @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+  conversation AiConversation?    @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  creator          User               @relation("OutputCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  reviews          AiReview[]
+  proposalSections ProposalDraftSection[]
+  governanceEvents  GovernanceEvent[]
+  outputValidations OutputValidation[]
+  reviewGates       ReviewGateStatus[]
+  feedbackEntries   FeedbackEntry[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+  @@index([conversationId])
+  @@index([outputType])
+  @@index([status])
+}
+
+model AiReview {
+  id                  String         @id @default(uuid())
+  aiGeneratedOutputId String
+  reviewerId          String
+  status              AiReviewStatus
+  comments            String?
+  reviewedAt          DateTime?
+  createdAt           DateTime       @default(now())
+
+  output   AiGeneratedOutput @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: Cascade)
+  reviewer User              @relation("OutputReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@index([aiGeneratedOutputId])
+  @@index([reviewerId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Presales Intelligence
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RequirementCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model RequirementAnalysis {
+  id                 String   @id @default(uuid())
+  organizationId     String
+  projectId          String
+  discoverySessionId String?
+  requirementId      String
+  analysis           String
+  confidenceScore    Float?
+  evidence           Json?
+  generatedByAgent   String?
+  generatedBySkill   String?
+  createdAt          DateTime @default(now())
+
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requirement Requirement       @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  session     DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([requirementId])
+  @@index([discoverySessionId])
+}
+
+model PainPointClassification {
+  id              String   @id @default(uuid())
+  organizationId  String
+  projectId       String
+  painPointId     String
+  category        String
+  severity        Severity @default(MEDIUM)
+  rootCause       String?
+  recommendation  String?
+  confidenceScore Float?
+  createdAt       DateTime @default(now())
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  painPoint PainPoint @relation(fields: [painPointId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([painPointId])
+}
+
+model NetsuiteModuleCatalog {
+  id                  String   @id @default(uuid())
+  moduleName          String   @unique
+  category            String
+  description         String?
+  dependencies        Json?
+  implementationNotes String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ModuleRecommendationAnalysis {
+  id                   String   @id @default(uuid())
+  organizationId       String
+  projectId            String
+  discoverySessionId   String?
+  moduleName           String
+  rationale            String
+  impactedArea         String?
+  implementationImpact String?
+  assumptions          String?
+  confidenceScore      Float?
+  evidence             Json?
+  generatedByAgent     String?
+  generatedBySkill     String?
+  createdAt            DateTime @default(now())
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+}
+
+model ScopeEstimation {
+  id                     String              @id @default(uuid())
+  organizationId         String
+  projectId              String
+  discoverySessionId     String?
+  scopeSummary           String
+  implementationApproach String?
+  estimatedComplexity    EstimatedComplexity @default(MEDIUM)
+  assumptions            String?
+  exclusions             String?
+  risks                  String?
+  confidenceScore        Float?
+  generatedByAgent       String?
+  generatedBySkill       String?
+  createdAt              DateTime            @default(now())
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  session DiscoverySession? @relation(fields: [discoverySessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([discoverySessionId])
+}
+
+model ProposalDraftSection {
+  id                String              @id @default(uuid())
+  organizationId    String
+  projectId         String
+  generatedOutputId String
+  sectionType       ProposalSectionType
+  title             String
+  content           String
+  sortOrder         Int                 @default(0)
+  createdAt         DateTime            @default(now())
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  output  AiGeneratedOutput @relation(fields: [generatedOutputId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([generatedOutputId])
+  @@index([sortOrder])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Functional Delivery Intelligence
+// ─────────────────────────────────────────────────────────────────────────────
+
+model FunctionalWorkstream {
+  id                 String            @id @default(uuid())
+  organizationId     String
+  projectId          String
+  name               String
+  description        String?
+  ownerId            String?
+  status             WorkstreamStatus  @default(PLANNED)
+  progressPercentage Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner     User?    @relation("WorkstreamOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  businessProcesses      BusinessProcess[]
+  uatScenarios           UatScenario[]
+  sopDocuments           SopDocument[]
+  functionalDeliverables FunctionalDeliverable[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model BusinessProcess {
+  id              String          @id @default(uuid())
+  organizationId  String
+  projectId       String
+  workstreamId    String?
+  processName     String
+  processCategory ProcessCategory
+  currentState    String?
+  futureState     String?
+  impactedModules Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  project     Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workstream  FunctionalWorkstream? @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+  steps       ProcessStep[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([workstreamId])
+  @@index([processCategory])
+}
+
+model ProcessStep {
+  id               String   @id @default(uuid())
+  businessProcessId String
+  stepOrder        Int      @default(0)
+  title            String
+  description      String?
+  actor            String?
+  systemAction     String?
+  approvalRequired Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  process BusinessProcess @relation(fields: [businessProcessId], references: [id], onDelete: Cascade)
+
+  @@index([businessProcessId])
+  @@index([stepOrder])
+}
+
+model FitGapAnalysis {
+  id                   String      @id @default(uuid())
+  organizationId       String
+  projectId            String
+  requirementId        String
+  fitCategory          FitCategory
+  rationale            String
+  recommendation       String?
+  implementationImpact String?
+  assumptions          String?
+  risks                String?
+  confidenceScore      Float?
+  generatedByAgent     String?
+  generatedBySkill     String?
+  createdAt            DateTime    @default(now())
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requirement Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([requirementId])
+  @@index([fitCategory])
+}
+
+model UatScenario {
+  id             String            @id @default(uuid())
+  organizationId String
+  projectId      String
+  workstreamId   String?
+  title          String
+  category       UatCategory       @default(POSITIVE_TEST)
+  precondition   String?
+  testSteps      String
+  expectedResult String
+  affectedModule String?
+  businessObjective String?
+  status         UatScenarioStatus @default(DRAFT)
+  generatedByAgent String?
+  generatedBySkill String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workstream FunctionalWorkstream? @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([workstreamId])
+  @@index([status])
+  @@index([category])
+}
+
+model SopDocument {
+  id               String    @id @default(uuid())
+  organizationId   String
+  projectId        String
+  workstreamId     String?
+  title            String
+  purpose          String?
+  scope            String?
+  responsibilities String?
+  processSteps     String?
+  approvalFlow     String?
+  exceptionHandling String?
+  status           SopStatus @default(DRAFT)
+  version          Int       @default(1)
+  generatedByAgent String?
+  generatedBySkill String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workstream FunctionalWorkstream? @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([workstreamId])
+  @@index([status])
+}
+
+model FunctionalDeliverable {
+  id             String                      @id @default(uuid())
+  organizationId String
+  projectId      String
+  workstreamId   String?
+  deliverableType DeliverableType
+  title          String
+  description    String?
+  status         FunctionalDeliverableStatus @default(DRAFT)
+  version        Int                         @default(1)
+  reviewStatus   String?
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+
+  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workstream FunctionalWorkstream? @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([workstreamId])
+  @@index([deliverableType])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Technical Delivery Intelligence
+// ─────────────────────────────────────────────────────────────────────────────
+
+model TechnicalWorkstream {
+  id                 String          @id @default(uuid())
+  organizationId     String
+  projectId          String
+  name               String
+  description        String?
+  ownerId            String?
+  status             WorkstreamStatus @default(PLANNED)
+  progressPercentage Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("TechnicalWorkstreamOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  technicalDeliverables TechnicalDeliverable[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model IntegrationMapping {
+  id                String            @id @default(uuid())
+  organizationId    String
+  projectId         String
+  name              String
+  description       String?
+  sourceSystem      String
+  targetSystem      String
+  integrationMethod IntegrationMethod @default(REST)
+  dataFlowNotes     String?
+  authMethod        String?
+  frequencyNotes    String?
+  assumptions       String?
+  risks             String?
+  status            TechnicalStatus   @default(DRAFT)
+  version           Int               @default(1)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([integrationMethod])
+  @@index([status])
+}
+
+model RestletDesign {
+  id                    String          @id @default(uuid())
+  organizationId        String
+  projectId             String
+  name                  String
+  endpointUrl           String?
+  method                RestletMethod   @default(GET)
+  requestSchema         Json?
+  responseSchema        Json?
+  authenticationType    String?
+  errorHandlingStrategy String?
+  notes                 String?
+  status                TechnicalStatus @default(DRAFT)
+  version               Int             @default(1)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([method])
+  @@index([status])
+}
+
+model ApiContract {
+  id             String          @id @default(uuid())
+  organizationId String
+  projectId      String
+  endpoint       String
+  method         RestletMethod   @default(GET)
+  requestSchema  Json?
+  responseSchema Json?
+  queryParams    Json?
+  headers        Json?
+  statusCodes    Json?
+  errorHandling  String?
+  authRequired   Boolean         @default(false)
+  notes          String?
+  status         TechnicalStatus @default(DRAFT)
+  version        Int             @default(1)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([method])
+  @@index([status])
+}
+
+model PayloadValidation {
+  id              String          @id @default(uuid())
+  organizationId  String
+  projectId       String
+  name            String
+  payloadType     PayloadType     @default(REQUEST)
+  schema          Json?
+  validationRules Json?
+  samplePayload   String?
+  notes           String?
+  status          TechnicalStatus @default(DRAFT)
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([payloadType])
+  @@index([status])
+}
+
+model TechnicalDeliverable {
+  id              String                   @id @default(uuid())
+  organizationId  String
+  projectId       String
+  workstreamId    String?
+  deliverableType TechnicalDeliverableType
+  title           String
+  description     String?
+  status          TechnicalStatus          @default(DRAFT)
+  version         Int                      @default(1)
+  reviewStatus    String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  project    Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workstream TechnicalWorkstream? @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([workstreamId])
+  @@index([deliverableType])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hypercare & Post-Implementation Intelligence
+// ─────────────────────────────────────────────────────────────────────────────
+
+model HypercareTask {
+  id             String               @id @default(uuid())
+  organizationId String
+  projectId      String
+  title          String
+  description    String?
+  ownerId        String?
+  status         HypercareTaskStatus  @default(BACKLOG)
+  priority       TaskPriority         @default(MEDIUM)
+  completedAt    DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("HypercareTaskOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  issues  Issue[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@index([priority])
+}
+
+model Issue {
+  id              String      @id @default(uuid())
+  organizationId  String
+  projectId       String
+  hypercareTaskId String?
+  title           String
+  description     String?
+  severity        Severity    @default(MEDIUM)
+  status          IssueStatus @default(OPEN)
+  assignedTo      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  hypercareTask HypercareTask? @relation(fields: [hypercareTaskId], references: [id], onDelete: SetNull)
+  assignee      User?          @relation("IssueAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([hypercareTaskId])
+  @@index([status])
+  @@index([severity])
+}
+
+model GoLiveReadiness {
+  id             String       @id @default(uuid())
+  organizationId String
+  projectId      String
+  checklistItem  String
+  status         GoLiveStatus @default(PENDING)
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model ChangeRequest {
+  id            String               @id @default(uuid())
+  organizationId String
+  projectId     String
+  title         String
+  description   String?
+  requestedBy   String?
+  status        ChangeRequestStatus  @default(PROPOSED)
+  priority      TaskPriority         @default(MEDIUM)
+  resolvedAt    DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requester User?   @relation("ChangeRequester", fields: [requestedBy], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@index([priority])
+}
+
+model PostImplementationRisk {
+  id             String             @id @default(uuid())
+  organizationId String
+  projectId      String
+  description    String
+  severity       Severity           @default(MEDIUM)
+  status         PostImplRiskStatus @default(OPEN)
+  mitigation     String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@index([severity])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Governance & RAG Layer
+// ─────────────────────────────────────────────────────────────────────────────
+
+model GovernanceEvent {
+  id                  String               @id @default(uuid())
+  organizationId      String
+  projectId           String
+  aiGeneratedOutputId String
+  agentName           String?
+  skillName           String?
+  eventType           GovernanceEventType
+  severity            Severity             @default(MEDIUM)
+  qualityScore        Float?
+  confidenceScore     Float?
+  ragStatus           RagStatus            @default(AMBER)
+  reviewerId          String?
+  notes               String?
+  createdAt           DateTime             @default(now())
+
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  output   AiGeneratedOutput @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: Cascade)
+  reviewer User?             @relation("GovernanceReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([aiGeneratedOutputId])
+  @@index([eventType])
+  @@index([ragStatus])
+  @@index([createdAt])
+}
+
+model OutputValidation {
+  id                  String           @id @default(uuid())
+  organizationId      String
+  projectId           String
+  aiGeneratedOutputId String
+  validationType      ValidationType
+  result              ValidationResult @default(PASS)
+  notes               String?
+  createdAt           DateTime         @default(now())
+
+  project Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  output  AiGeneratedOutput @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([aiGeneratedOutputId])
+  @@index([validationType])
+  @@index([result])
+}
+
+model ReviewGateStatus {
+  id                  String               @id @default(uuid())
+  organizationId      String
+  projectId           String
+  aiGeneratedOutputId String
+  stage               ReviewGateStage
+  status              ReviewGateStatusEnum @default(PENDING)
+  reviewerId          String?
+  notes               String?
+  createdAt           DateTime             @default(now())
+
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  output   AiGeneratedOutput @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: Cascade)
+  reviewer User?             @relation("ReviewGateReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([aiGeneratedOutputId])
+  @@index([stage])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enterprise Reporting & Dashboard Layer
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DashboardKpiSnapshot {
+  id             String   @id @default(uuid())
+  organizationId String
+  projectId      String?
+  workstreamId   String?
+  metricName     String
+  metricValue    Float
+  metricUnit     String?
+  metadata       Json?
+  snapshotAt     DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([metricName])
+  @@index([snapshotAt])
+}
+
+model DashboardTrendHistory {
+  id             String   @id @default(uuid())
+  organizationId String
+  projectId      String?
+  metricName     String
+  metricValue    Float
+  period         String
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([metricName])
+  @@index([period])
+}
+
+model DashboardRagSummary {
+  id             String   @id @default(uuid())
+  organizationId String
+  projectId      String
+  greenCount     Int      @default(0)
+  amberCount     Int      @default(0)
+  redCount       Int      @default(0)
+  totalOutputs   Int      @default(0)
+  snapshotAt     DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([snapshotAt])
+}
+
+model DashboardHypercareSummary {
+  id                    String   @id @default(uuid())
+  organizationId        String
+  projectId             String
+  openIssues            Int      @default(0)
+  resolvedIssues        Int      @default(0)
+  criticalIssues        Int      @default(0)
+  goLiveCompletion      Float    @default(0)
+  openTasks             Int      @default(0)
+  completedTasks        Int      @default(0)
+  pendingChangeRequests Int      @default(0)
+  snapshotAt            DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([snapshotAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prompt 12 — AI Continuous Improvement Layer
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum FeedbackType {
+  HUMAN_REVIEW
+  GOVERNANCE_FLAG
+  HYPERCARE_OUTCOME
+  TASK_OUTCOME
+  RISK_OBSERVED
+  AI_OUTPUT_PERFORMANCE
+}
+
+enum FeedbackSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RecommendationType {
+  PROCESS
+  AI_MODEL
+  WORKFLOW
+  RISK_MITIGATION
+}
+
+enum RecommendationStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  IMPLEMENTED
+  REJECTED
+}
+
+enum OptimizationMetricType {
+  EFFICIENCY
+  ACCURACY
+  RISK_MITIGATION
+  AI_OUTPUT_QUALITY
+}
+
+model FeedbackEntry {
+  id                  String           @id @default(uuid())
+  organizationId      String
+  projectId           String
+  workstreamId        String?
+  aiGeneratedOutputId String?
+  feedbackType        FeedbackType
+  description         String           @db.Text
+  severity            FeedbackSeverity @default(MEDIUM)
+  confidenceScore     Float?
+  createdBy           String
+  createdAt           DateTime         @default(now())
+
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdByUser     User               @relation("FeedbackCreatedBy", fields: [createdBy], references: [id])
+  aiGeneratedOutput AiGeneratedOutput? @relation(fields: [aiGeneratedOutputId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([feedbackType])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model OptimizationRecommendation {
+  id                 String               @id @default(uuid())
+  organizationId     String
+  projectId          String
+  workstreamId       String?
+  recommendationType RecommendationType
+  description        String               @db.Text
+  confidenceScore    Float?
+  impactScore        Float?
+  status             RecommendationStatus @default(DRAFT)
+  createdBy          String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdByUser User    @relation("RecommendationCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([recommendationType])
+  @@index([status])
+}
+
+model OptimizationScore {
+  id             String                 @id @default(uuid())
+  organizationId String
+  projectId      String
+  workstreamId   String?
+  metricType     OptimizationMetricType
+  score          Float
+  ragStatus      RagStatus
+  calculatedAt   DateTime               @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([metricType])
+  @@index([calculatedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prompt 13 — SaaS Multi-Tenant Management Layer
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  TRIAL
+}
+
+enum UsageMetricType {
+  AI_OUTPUT_COUNT
+  API_USAGE
+  STORAGE_USED
+  ACTIVE_USERS
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  VOID
+}
+
+model SubscriptionPlan {
+  id            String   @id @default(uuid())
+  name          String
+  features      Json
+  pricePerMonth Float    @default(0)
+  pricePerYear  Float    @default(0)
+  maxUsers      Int      @default(5)
+  maxProjects   Int      @default(10)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenants  Tenant[]
+  invoices BillingInvoice[]
+
+  @@index([isActive])
+}
+
+model Tenant {
+  id                 String          @id @default(uuid())
+  organizationId     String          @unique
+  name               String
+  domain             String?
+  status             TenantStatus    @default(ACTIVE)
+  subscriptionPlanId String?
+  trialEndsAt        DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subscriptionPlan SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id], onDelete: SetNull)
+  usageRecords     TenantUsage[]
+  invoices         BillingInvoice[]
+  roles            TenantRole[]
+  userRoles        TenantUserRole[]
+  deploymentServices DeploymentService[]
+  deploymentRuns     DeploymentRun[]
+  serviceMetrics     ServiceMetric[]
+  deploymentAlerts   DeploymentAlert[]
+  secretStores        SecretStore[]
+  accessLogs          AccessLog[]
+  superuserActionLogs SuperuserActionLog[]
+  globalAnalyticsSnapshots GlobalAnalyticsSnapshot[]
+
+  @@index([status])
+  @@index([subscriptionPlanId])
+}
+
+model TenantUsage {
+  id           String          @id @default(uuid())
+  tenantId     String
+  metricType   UsageMetricType
+  value        Float
+  periodStart  DateTime
+  periodEnd    DateTime
+  createdAt    DateTime        @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([metricType])
+  @@index([periodStart])
+}
+
+model BillingInvoice {
+  id                  String        @id @default(uuid())
+  tenantId            String
+  subscriptionPlanId  String?
+  billingPeriodStart  DateTime
+  billingPeriodEnd    DateTime
+  amount              Float
+  status              InvoiceStatus @default(PENDING)
+  paymentMethod       String?
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscriptionPlan SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([billingPeriodStart])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Security & Compliance Models (Prompt 15)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum EncryptionMethod {
+  AES_256_GCM
+  RSA
+  HASHED
+}
+
+enum SecretType {
+  API_KEY
+  DB_PASSWORD
+  TOKEN
+  WEBHOOK_SECRET
+  OAUTH_CLIENT_SECRET
+}
+
+enum RotationPolicy {
+  MANUAL
+  DAYS_30
+  DAYS_60
+  DAYS_90
+}
+
+enum AccessActionType {
+  READ
+  CREATE
+  UPDATE
+  DELETE
+  EXPORT
+  ROTATE_SECRET
+  REVOKE_SECRET
+  LOGIN
+  LOGOUT
+  SECURITY_CHECK
+}
+
+enum AccessResult {
+  SUCCESS
+  FAILURE
+}
+
+enum SecretStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+}
+
+model EncryptedField {
+  id               String           @id @default(uuid())
+  tableName        String
+  columnName       String
+  encryptionMethod EncryptionMethod
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([tableName, columnName])
+  @@index([tableName])
+}
+
+model AccessLog {
+  id           String         @id @default(uuid())
+  organizationId String?
+  userId       String?
+  tenantId     String?
+  projectId    String?
+  entityType   String
+  entityId     String?
+  actionType   AccessActionType
+  result       AccessResult
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json           @default("{}")
+  timestamp    DateTime       @default(now())
+
+  organization Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user         User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tenant       Tenant?        @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  project      Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([entityType])
+  @@index([actionType])
+  @@index([result])
+  @@index([timestamp])
+}
+
+model SecretStore {
+  id               String         @id @default(uuid())
+  organizationId   String
+  tenantId         String?
+  secretType       SecretType
+  secretName       String
+  secretValue      String
+  encryptionMethod EncryptionMethod @default(AES_256_GCM)
+  status           SecretStatus     @default(ACTIVE)
+  rotationPolicy   RotationPolicy   @default(DAYS_90)
+  lastRotatedAt    DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, tenantId, secretName])
+  @@index([organizationId])
+  @@index([tenantId])
+  @@index([secretType])
+  @@index([status])
+}
+
+
+model TenantRole {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  permissions Json     @default("[]")
+  createdAt   DateTime @default(now())
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userRoles TenantUserRole[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model TenantUserRole {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   TenantRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, roleId])
+  @@index([tenantId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prompt 14 — Deployment & DevOps Layer
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum DeploymentEnvironmentType {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+}
+
+enum DeploymentEnvironmentStatus {
+  ACTIVE
+  DEGRADED
+  MAINTENANCE
+  OFFLINE
+}
+
+enum DeploymentServiceStatus {
+  PENDING
+  BUILDING
+  DEPLOYING
+  RUNNING
+  DEGRADED
+  FAILED
+  ROLLING_BACK
+  STOPPED
+}
+
+enum DeploymentHealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  UNKNOWN
+}
+
+enum DeploymentActionType {
+  BUILD
+  TEST
+  DEPLOY
+  ROLLBACK
+  SCALE
+  SELF_HEAL
+}
+
+enum DeploymentRunStatus {
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+  ROLLED_BACK
+}
+
+enum ServiceMetricType {
+  CPU_USAGE
+  MEMORY_USAGE
+  LATENCY_MS
+  ERROR_RATE
+  UPTIME_SECONDS
+}
+
+enum DeploymentAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum DeploymentAlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum SuperuserActionType {
+  TenantActivation
+  SubscriptionOverride
+  UserRoleChange
+  DeploymentTrigger
+}
+
+enum GlobalMetricType {
+  CrossTenantKPI
+  AIOutputQuality
+  RAGDistribution
+  UsageSummary
+}
+
+model DeploymentEnvironment {
+  id          String                      @id @default(uuid())
+  name        String
+  slug        String                      @unique
+  type        DeploymentEnvironmentType
+  status      DeploymentEnvironmentStatus @default(ACTIVE)
+  region      String?
+  baseUrl     String?
+  registryUrl String?
+  secretsRef  String?
+  config      Json                        @default("{}")
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+
+  services DeploymentService[]
+  runs     DeploymentRun[]
+  metrics  ServiceMetric[]
+  alerts   DeploymentAlert[]
+
+  @@index([type])
+  @@index([status])
+}
+
+model DeploymentService {
+  id              String                 @id @default(uuid())
+  environmentId   String
+  tenantId        String?
+  name            String
+  module          String
+  image           String?
+  imageTag        String?
+  desiredReplicas Int                    @default(1)
+  currentReplicas Int                    @default(0)
+  status          DeploymentServiceStatus @default(PENDING)
+  healthStatus    DeploymentHealthStatus @default(UNKNOWN)
+  lastDeployedAt  DateTime?
+  lastCheckedAt   DateTime?
+  config          Json                   @default("{}")
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  environment DeploymentEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  tenant      Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  runs        DeploymentRun[]
+  metrics     ServiceMetric[]
+  alerts      DeploymentAlert[]
+
+  @@unique([environmentId, tenantId, name])
+  @@index([environmentId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([healthStatus])
+}
+
+model DeploymentRun {
+  id                  String              @id @default(uuid())
+  organizationId      String
+  tenantId            String?
+  environmentId       String
+  serviceId           String?
+  actionType          DeploymentActionType
+  status              DeploymentRunStatus @default(QUEUED)
+  version             String?
+  imageTag            String?
+  commitSha           String?
+  rollbackTargetRunId String?
+  triggeredBy         String?
+  startedAt           DateTime            @default(now())
+  finishedAt          DateTime?
+  logs                Json                @default("[]")
+  metadata            Json                @default("{}")
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  tenant       Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  environment  DeploymentEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  service      DeploymentService?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  actor        User?                 @relation("DeploymentTriggeredBy", fields: [triggeredBy], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([tenantId])
+  @@index([environmentId])
+  @@index([serviceId])
+  @@index([actionType])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model ServiceMetric {
+  id            String            @id @default(uuid())
+  environmentId String
+  serviceId     String?
+  tenantId      String?
+  metricType    ServiceMetricType
+  value         Float
+  unit          String?
+  measuredAt    DateTime          @default(now())
+
+  environment DeploymentEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  service     DeploymentService?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  tenant      Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([environmentId])
+  @@index([serviceId])
+  @@index([tenantId])
+  @@index([metricType])
+  @@index([measuredAt])
+}
+
+model DeploymentAlert {
+  id            String                  @id @default(uuid())
+  environmentId String
+  serviceId     String?
+  tenantId      String?
+  severity      DeploymentAlertSeverity
+  status        DeploymentAlertStatus   @default(OPEN)
+  message       String
+  source        String?
+  createdAt     DateTime                @default(now())
+  resolvedAt    DateTime?
+
+  environment DeploymentEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  service     DeploymentService?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  tenant      Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([environmentId])
+  @@index([serviceId])
+  @@index([tenantId])
+  @@index([severity])
+  @@index([status])
+}
+
+model SuperuserActionLog {
+  id              String              @id @default(uuid())
+  superuserId     String
+  actionType      SuperuserActionType
+  targetTenantId  String?
+  targetProjectId String?
+  description     String              @db.Text
+  timestamp       DateTime            @default(now())
+
+  superuser     User     @relation("SuperuserActionActor", fields: [superuserId], references: [id], onDelete: Restrict)
+  targetTenant  Tenant?  @relation(fields: [targetTenantId], references: [id], onDelete: SetNull)
+  targetProject Project? @relation(fields: [targetProjectId], references: [id], onDelete: SetNull)
+
+  @@index([superuserId])
+  @@index([actionType])
+  @@index([targetTenantId])
+  @@index([targetProjectId])
+  @@index([timestamp])
+}
+
+model GlobalAnalyticsSnapshot {
+  id           String           @id @default(uuid())
+  metricType   GlobalMetricType
+  value        Json
+  tenantId     String?
+  projectId    String?
+  snapshotDate DateTime         @default(now())
+
+  tenant  Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([metricType])
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([snapshotDate])
+}
